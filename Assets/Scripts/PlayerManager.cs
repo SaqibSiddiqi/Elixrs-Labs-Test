@@ -9,15 +9,19 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Animator animator;
 
-    
+    public bool isAttacking = false;
 
     public float movSpeed = 0.0f;
     public float rotSpeed = 0.0f;
+
+    [SerializeField]
+    private GameObject enemy;
 
 
     private void FixedUpdate()
     {
         Movement();
+        AimEnemy();
     }
 
     private void Movement()
@@ -32,9 +36,53 @@ public class PlayerManager : MonoBehaviour
         }
         animator.SetBool("speed", true);
 
-        Vector3 lookDirection = Vector3.RotateTowards(controller.transform.forward, movmentDirection, rotSpeed * Time.deltaTime, 0.0f);
-        controller.transform.rotation = Quaternion.LookRotation(lookDirection);
+        if (!isAttacking) 
+        {
+            Vector3 lookDirection = Vector3.RotateTowards(controller.transform.forward, movmentDirection, rotSpeed * Time.deltaTime, 0.0f);
+            controller.transform.rotation = Quaternion.LookRotation(lookDirection);
+        }
 
+        
+
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Enemy")
+        {
+            if (!isAttacking)
+            {
+                isAttacking = true;
+                enemy = other.gameObject;
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.gameObject.tag == "Enemy")
+        {
+            if (isAttacking)
+            {
+                isAttacking = false;
+                enemy = null;
+            }
+        }
+    }
+
+    private void Attack()
+    {
+        
+    }
+
+    private void AimEnemy()
+    {
+        if(enemy != null)
+        {
+            Vector3 enemyPosition = new Vector3(enemy.transform.position.x, 0.0f, enemy.transform.position.z);
+            Vector3 aimDirection = Vector3.RotateTowards(controller.transform.forward, enemyPosition, rotSpeed * Time.deltaTime, 0.0f);
+            controller.transform.rotation = Quaternion.LookRotation(enemyPosition);
+        }
     }
 
 }
